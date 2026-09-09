@@ -1,1 +1,73 @@
-collab/ 
+# ---------------------------------------------------------------------------
+# Lab 1 folder (1.6 GB: raw CICIDS2017 CSVs, clean.csv, splits.joblib, models)
+# ---------------------------------------------------------------------------
+# Everyone needs this folder locally, but it must never go into git.
+# See TASKS.md -> Task T00 for how the second person gets a copy.
+collab/
+
+# ---------------------------------------------------------------------------
+# Data (too big for git, and the dataset has its own licence)
+# ---------------------------------------------------------------------------
+lab2/data/*
+data/raw/
+data/processed/
+*.csv.zip
+*.parquet
+*.npz
+*.joblib
+*.pkl
+*.h5
+
+# Exception: keep the tiny fingerprint file, it proves both of us used the
+# same data snapshot (Task T02).
+!lab2/data/data_fingerprint.json
+
+# ---------------------------------------------------------------------------
+# Results: keep the small stuff (tables, figures, per-run JSON), drop models
+# ---------------------------------------------------------------------------
+lab2/results/models/
+results/models/
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ---------------------------------------------------------------------------
+# Jupyter / Colab
+# ---------------------------------------------------------------------------
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# ---------------------------------------------------------------------------
+# Editors and operating systems
+# ---------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------------------
+# Report build leftovers (keep the final PDF, drop LaTeX/Word junk)
+# ---------------------------------------------------------------------------
+*.aux
+*.log
+*.out
+*.toc
+~$*.docx
