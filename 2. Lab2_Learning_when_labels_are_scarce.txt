@@ -1,0 +1,154 @@
+Lab 2: Learning When Labels Are Scarce 
+
+1. What is this lab about? 
+In real security work, labelling traffic is slow and expensive, so you usually have labels for only a 
+small part of your data and a large unlabeled 
+data. Semi-supervised learning (SSL) uses both the few 
+labels and the unlabelled data together. In this lab you pretend you only have a few labels, use SSL 
+to get value from the rest, and see how close you can get to your Lab 1 detector. 
+
+You will work at three label budgets: 
+
+• 1% labels — only a tiny slice is labelled. 
+• 5% and 10% labels — a bit more, so you can see the trend. 
+2. What you will be able to do afterwards 
+• Set up a fair experiment where only a few labels are available. 
+• Use unlabelled data to improve a detector (semi-supervised learning). 
+• Compare against the right baselines so you can tell if it really helped. 
+• Explain when semi-supervised learning helps and when it backfires. 
+3. Tools and setup 
+• Language: Python 3. Work in a Jupyter notebook or google colab or plain scripts , you can use 
+what you prefer. 
+• Core libraries: pandas (load/clean data), scikit-learn (models, metrics, and semi-supervised 
+tools), matplotlib (plots). 
+• Reuse Lab 1: build on the code you already wrote in Lab 1. A neural network is only needed if 
+you pick Mean Teacher. 
+• Install once: pip install pandas scikit-learn matplotlib (add tensorflow or torch if you use them). 
+4. The dataset 
+Use the same dataset and the same test set as Lab 1 (CICIDS2017 or CICIDS2018, from the Canadian 
+Institute for Cybersecurity). Reuse your Lab 1 cleaning so the two labs compare fairly. 
+
+Make life easier 
+
+Work on a sample first, then scale up if you have time. With only 1% labels, the exact rows you 
+pick matter, so if you can, run each setting a few times and report the average. 
+
+Reuse your Lab 1 setup (and why) 
+
+Keep the same cleaning, the same train / validation / test split, and the same test set. 
+The test set stays fully labelled and untouched. This is what lets you compare Lab 2 against Lab 1 
+honestly. 
+
+5. Which methods to use 
+Use pseudo-labelling (required), and one more semi-supervised method of your choice. 
+
+
+Method What it is / beginner tip 
+Pseudo-labelling (required) Train on the few labels, let the model guess the rest, keep only the 
+confident guesses, and retrain. Simple and effective. 
+Co-training (choose one) Split the features into two halves, train two models, and let each one teach 
+the other with its confident guesses. Easiest of the three. 
+Mean Teacher (choose one) A student model learns to agree with a slow, averaged teacher, even on 
+slightly noised input. Needs a neural network. 
+FixMatch (choose one) Keep a guess only when the model is confident on a lightly changed input, 
+then make it agree on a strongly changed one. Most advanced, and 
+changing table data is tricky, so explain your choice. 
+
+Baselines cheat-sheet 
+
+Always compare your SSL result against two lines: a model trained on the few labels only (the 
+lower line SSL must beat), and your full-label Lab 1 model (the upper line SSL tries to approach). 
+Without both, an SSL score means nothing. 
+
+6. Step-by-step tasks 
+Step 1: Recreate your baselines 
+
+• Note your full Lab 1 score (all labels). This is the upper line. Then, at each budget (1%, 5%, 10%), 
+train a plain model on only the labelled slice. This is the lower line. 
+Step 2: Make the “few labels” splits 
+
+• From the Lab 1 training set, keep the labels for 1%, 5%, and 10% of the rows (stratified, so the 
+class balance stays the same). Hide the labels on the rest, this is your unlabelled pool. Fix the 
+random seed. 
+Step 3: Pseudo-labelling 
+
+• Train on the labelled slice, guess the unlabelled pool, keep only the confident guesses, add 
+them, and retrain. Repeat. Say what confidence cut-off you used. 
+Step 4: One more method (your choice) 
+
+• Add co-training, Mean Teacher, or FixMatch at each budget. Keep everything else the same as 
+Step 3 so the comparison is fair. 
+Step 5: Run one “change one thing” experiment 
+
+What an ablation is 
+
+Change exactly one thing, keep everything else the same, and see what happens to the scores. It 
+shows which choices actually matter. 
+
+• Pick one: (a) try a few confidence cut-offs 
+• (b) use 25% / 50% / 100% of the unlabelled pool. Report the before/after numbers. 
+Step 6: Compare your results: 
+
+• Put all results in one table (accuracy, macro-F1, recall, ROC-AUC, FAR), and draw a curve of a 
+metric against the label budget with the lower and upper lines shown. 
+
+• Right metric: because the data is imbalanced, judge with macro-F1 and FAR, not accuracy 
+alone. Also check recall so you do not miss attacks. 
+7. What to hand in 
+Your code. A notebook or scripts plus a short README or PDF that lists the libraries and how to run 
+it. Include the random seed. 
+
+A short report (2–3 pages). Suggested sections: 
+
+• Why labels are scarce, and what semi-supervised learning is , a short paragraph. 
+• What you did . 
+• Results (one clear table + a curve, each with a caption you actually refer to). 
+• Discussion (did SSL help, at which budget, and where it failed). 
+• Who did what (one or two lines). 
+How your work is graded 
+
+Every lab is graded 3 / 4 / 5 / F on the same four things. You do not need to be perfect to pass , you 
+need the work to run, to make sense, and to be clearly reported. The table shows what “good” looks 
+like for this lab. 
+
+Criterion Weight What good work looks like here 
+Implementation and code 
+quality 
+30% Code runs start-to-finish and reproduces your numbers; reuses 
+your Lab 1 code; a README explains how to run it; seed is fixed; 
+reasonably tidy. 
+Experimental design and 
+methodology 
+25% Correct “few labels” split; both baselines shown (few-labels-only 
+and full-label Lab 1); one ablation; the test set is never peeked 
+at. 
+Results and analysis 20% Accuracy, macro-F1, recall, ROC-AUC and FAR reported; the gain 
+over the lower line is clear; failure cases discussed. 
+Report quality 25% Clear 2–3 pages; captioned table/curve used in the text; who-
+did-what line included + Appendix: your code (screenshots of 
+each part with comment explaining the code) 
+
+Submitting your work 
+
+• Where. Upload to CANVAS by the deadline: your code (a zip or a repository link) and the report 
+as a PDF. Late submissions are not accepted in general. 
+• Group work. Work together for real. Add a short line at the end of the report saying who did 
+what. If one person does everything, that shows up in individual grades. 
+• Second chance. If a lab does not reach grade 3 you may resubmit it once, before the final 
+reporting date in the schedule. 
+• Honesty. You may use libraries, tutorials, and public code, just cite them. 
+
+• Common mistakes to avoid 
+• Skipping the few-labels-only baseline, then you cannot show that SSL helped. 
+• Setting the confidence cut-off too low, so the model learns from its own bad guesses. 
+• Judging only by accuracy while attacks get missed, always check recall and macro-F1. 
+Where to read more 
+
+• scikit-learn documentation — “Semi-supervised learning” user guide. 
+• Lee, D.-H. (2013). Pseudo-Label: The simple and efficient semi-supervised learning method for 
+deep neural networks. ICML Workshop on Challenges in Representation Learning. 
+• Van Engelen, J. E., & Hoos, H. H. (2020). A survey on semi-supervised learning. Machine 
+Learning, 109(2), 373-440. 
+• CICIDS2017 download from : https://www.unb.ca/cic/datasets/ids-2017.html or Kaggle 
+• CICIDS2018 download from : https://www.unb.ca/cic/datasets/ids-2018.html or Kaggle 
+
