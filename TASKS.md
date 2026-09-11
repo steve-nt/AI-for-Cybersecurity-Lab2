@@ -8,6 +8,54 @@ time, on different machines, without talking to each other.
 
 ---
 
+## Progress — checked 2026-09-11 against `Lab_2_SSL_CICIDS.ipynb`
+
+The teammate's notebook (commit `ad77757`, 29 cells, fully executed on the real CICIDS2017 CSVs)
+implements most of the experiment in one file, instead of the `lab2/src/*.py` layout in section 4.
+A task is ~~crossed out~~ when the notebook meets the lab brief's requirement for it. Anything still
+missing is listed on the task's **Status** line.
+
+> **Blocking problem: every number in the notebook must be regenerated before it goes in the report.**
+> The notebook ran in `raw_csv` mode, so it built its **own** split instead of reusing Lab 1's
+> (its own output warns: *"raw_csv mode creates a new split"*). The brief requires the same
+> cleaning, split and test set as Lab 1.
+>
+> | | Lab 1 | Notebook |
+> |---|---|---|
+> | Rows used | 446,641 (20% sample, duplicates removed) | 2,830,743 (every row, duplicates kept) |
+> | Train / val / test | 267,984 / 89,328 / 89,329 | 1,698,445 / 566,149 / 566,149 |
+> | Features | 68 | 70: keeps `Destination Port` and the duplicated `Fwd Header Length.1`, both dropped in Lab 1 |
+> | Attack rate | 15.07% | 19.70% |
+>
+> Kept duplicates can land in both train and test, and Lab 1 dropped `Destination Port` as a
+> leakage risk, so the notebook's scores are likely inflated. **The fix is T02**, and it needs no
+> change to the notebook code (see T02's status line).
+
+| Task | Status | Where in the notebook |
+|---|---|---|
+| T00 environment | Partial | runs on the teammate's machine; this machine has no pandas yet |
+| ~~T01 config~~ | Done | §2 Configuration |
+| T02 Lab 1 data snapshot | **Not done, blocking** | §3 loaded raw CSVs instead |
+| ~~T03 scoring + results~~ | Done | §5 `evaluate_model`, §10 CSV files |
+| ~~T04 label-budget splits~~ | Done | §5 `make_label_budget_split` |
+| T05 upper line | Partial | §8 retrained, not Lab 1's score |
+| ~~T06 lower line~~ | Done | §9 |
+| ~~T07 pseudo-labelling~~ | Done | §6, §9 |
+| ~~T08 co-training~~ | Done | §7, §9 |
+| T09 threshold ablation | Partial, result not usable | §11 |
+| T10 pool-size ablation | Not started (optional) | none |
+| ~~T11 results table~~ | Done | §10 Table 1 |
+| ~~T12 curve~~ | Done | §12 Figure 1 |
+| T13 README | Partial | "How to run" inside §14 |
+| T14 report | Not started | §14 has prompts only |
+| T15 reproducibility | Not started | none |
+| T16 submission | Not started | none |
+
+The "Done" rows share one more gap: only seed 42 was run (`SEEDS = (42,)`), so every ± spread is 0.
+Set `SEEDS = (42, 43, 44)` in §2 when you re-run after T02.
+
+---
+
 ## 0. The one-paragraph version of this lab
 
 In Lab 1 you built an intrusion detector: you gave a model 268,000 network connections
@@ -156,13 +204,13 @@ lab2/
 
 | Person A (SSL track 1) | Person B (SSL track 2) |
 |---|---|
-| T01 skeleton + config **(blocking, do first)** | T00 environment + get the Lab 1 folder |
-| T02 data snapshot | T03 scoring + results writer |
-| T05 upper baseline | T04 label-budget splits |
-| **T07 pseudo-labelling (required)** | T06 lower baseline |
-| T09 ablation (confidence cut-off) | **T08 co-training** |
-| T11 results table | T10 ablation (pool size, optional) |
-| T14 report: intro, method, discussion | T12 curve figure |
+| ~~T01 skeleton + config **(blocking, do first)**~~ | T00 environment + get the Lab 1 folder |
+| T02 data snapshot | ~~T03 scoring + results writer~~ |
+| T05 upper baseline | ~~T04 label-budget splits~~ |
+| ~~**T07 pseudo-labelling (required)**~~ | ~~T06 lower baseline~~ |
+| T09 ablation (confidence cut-off) | ~~**T08 co-training**~~ |
+| ~~T11 results table~~ | T10 ablation (pool size, optional) |
+| T14 report: intro, method, discussion | ~~T12 curve figure~~ |
 | | T13 README |
 | T15 reproducibility check (together) | T15 reproducibility check (together) |
 | T16 submission (together) | T16 submission (together) |
@@ -195,6 +243,8 @@ checklist into your commit message.
 
 ## T00 — Get a working machine (Person B, but both must end up here)
 
+> **Status 2026-09-11: PARTIAL.** The teammate's machine runs the whole notebook (Python 3.11.9, scikit-learn 1.9.0, XGBoost 3.2.0 with CUDA). Still open: this machine has no `pandas` or `scikit-learn` installed, and the notebook did not use Lab 1's `splits.joblib` (see T02).
+
 **Needs:** nothing. **Produces:** a Python that can `import sklearn`. **Time:** 30 min.
 
 **Why:** Person B's clone of the repo will *not* contain `collab/` — it is 1.6 GB and
@@ -226,7 +276,9 @@ checklist into your commit message.
 
 ---
 
-## T01 — Lab 2 skeleton and central settings (Person A) — **blocking, do this first**
+## ~~T01 — Lab 2 skeleton and central settings (Person A) — **blocking, do this first**~~
+
+> **Status 2026-09-11: DONE** as notebook §2, a single settings cell (`SEED`, `SEEDS`, `BUDGETS`, `CONFIDENCE_THRESHOLD = 0.95`, `SSL_ROUNDS = 2`, …), instead of `lab2/src/config.py`. The team's base-model choice is recorded there: XGBoost on the GPU, falling back to `HistGradientBoostingClassifier`, rather than Random Forest. Still missing: a `requirements.txt`.
 
 **Needs:** nothing. **Produces:** `lab2/` folders, `lab2/src/config.py`, `lab2/requirements.txt`. **Time:** 30 min.
 
@@ -264,6 +316,8 @@ lets two people work apart: you both code against the same constants.
 
 ## T02 — Freeze the data snapshot (Person A)
 
+> **Status 2026-09-11: NOT DONE, blocking.** The notebook set `DATA_MODE` to `raw_csv` and built a new split from the 8 raw CSVs (see the Progress table at the top). The notebook can already use the correct data with no code change. Save Lab 1's `splits.joblib` as `data/lab1_splits.npz` with the keys `X_train, y_train, X_val, y_val, X_test, y_test`, where `X_*` are Lab 1's raw `X_*` (as arrays) and `y_*` are Lab 1's `yb_*`. Store `feature_names` as a plain string array, because the notebook loads with `allow_pickle=False`. Then choose Run All: `auto` mode checks for the `.npz` first. After that, re-run everything below.
+
 **Needs:** T01. **Produces:** `lab2/data/lab2_data.npz`, `lab2/data/data_fingerprint.json`, `lab2/src/data.py`. **Time:** 45 min.
 
 **Why:** `splits.joblib` is 512 MB and holds things Lab 2 does not need. Squeeze it into one
@@ -292,7 +346,9 @@ compare — cheap insurance against silently working on different data.
 
 ---
 
-## T03 — Scoring and the results writer (Person B)
+## ~~T03 — Scoring and the results writer (Person B)~~
+
+> **Status 2026-09-11: DONE** as `evaluate_model` in notebook §5, with CSV output in §10 (`lab2_outputs/lab2_results_raw.csv`, `lab2_results_summary.csv`). All five metrics are computed, and the formulas are correct: FAR = FP/(FP+TN), attack recall, macro-F1, and ROC-AUC on the attack probability. Differences from the plan: it re-implements the metrics instead of importing Lab 1's `metrics.py` (the brief grades code reuse, so mention this in the report), and it writes CSVs instead of one JSON file per run, which is fine for a single notebook. `lab2_outputs/` is not in the repo yet.
 
 **Needs:** T01 only — **not** the data, so you can do this while Person A is still copying files. **Produces:** `lab2/src/results_io.py`. **Time:** 30 min.
 
@@ -327,7 +383,9 @@ CSV, so you can both run experiments all afternoon and never hit a merge conflic
 
 ---
 
-## T04 — Build the "few labels" splits (Person B)
+## ~~T04 — Build the "few labels" splits (Person B)~~
+
+> **Status 2026-09-11: DONE** as `make_label_budget_split` in notebook §5: a seeded `StratifiedShuffleSplit` on the training set only, with asserts that the labelled and unlabelled rows don't overlap and together cover the whole training set. Differences from the plan: it stratifies on the binary label (the brief only asks for the class balance to stay the same, so this is fine), the splits live in memory rather than on disk, and only seed 42 was run.
 
 **Needs:** T01 (T02 to run for real; develop against fake data meanwhile). **Produces:** `lab2/src/splits.py` and `lab2/data/splits/budget_{b}_seed{s}.npz`. **Time:** 1 h.
 
@@ -363,6 +421,8 @@ attack rate in every slice is within ±0.005 of 0.1507; `set(labeled) & set(unla
 
 ## T05 — The upper line (Person A)
 
+> **Status 2026-09-11: PARTIAL.** Notebook §8 retrains the full-label model because `LAB1_FULL_METRICS = None`. That gives macro-F1 0.9986 and FAR 0.0011 on the notebook's own split. The brief's upper line is the Lab 1 score (Random Forest: 0.9968 / 0.0006). Once T02 is fixed, keep the retrained upper line, because it uses the same model as the SSL methods and is the fair comparison, and quote Lab 1's Random Forest score next to it in the report.
+
 **Needs:** T02, T03. **Produces:** `lab2/results/runs/upper_*.json`, `lab2/src/baseline_upper.py`. **Time:** 30 min.
 
 **Why:** The upper line is "what could I have scored if I had paid for every label" — the ceiling
@@ -386,7 +446,9 @@ into the same JSON format as everything else, so T11 can build one table.
 
 ---
 
-## T06 — The lower line: few labels only (Person B)
+## ~~T06 — The lower line: few labels only (Person B)~~
+
+> **Status 2026-09-11: DONE** in notebook §9 at 1 / 5 / 10% (seed 42), scored on the test set: macro-F1 0.9969 / 0.9983 / 0.9984. These numbers come from the wrong split, so regenerate them after T02.
 
 **Needs:** T02, T03, T04. **Produces:** `lab2/results/runs/lower_*.json`, `lab2/src/baseline_lower.py`. **Time:** 1 h.
 
@@ -410,7 +472,9 @@ as the #1 common mistake.
 
 ---
 
-## T07 — Pseudo-labelling — **REQUIRED METHOD** (Person A)
+## ~~T07 — Pseudo-labelling — **REQUIRED METHOD** (Person A)~~
+
+> **Status 2026-09-11: DONE** in notebook §6 and §9. Settings: cut-off 0.95, 2 rounds, pseudo-labels weighted 0.5, retrained every round, and the hidden labels are never read. Change in macro-F1 against the lower line: −0.0003 / −0.0000 / +0.0001 at 1 / 5 / 10%, so no real gain. FAR did drop at every budget (0.0016→0.0012, 0.0010→0.0008, 0.0011→0.0009). **For the report:** the numbers of rows added (33,968 / 169,844 / 339,688) are exactly the per-class cap × 2 rounds. So the **cap, not the 0.95 cut-off, decided how many rows were added**. Still missing: pseudo-label accuracy against the hidden labels (step 3).
 
 **Needs:** T02, T03, T04. **Produces:** `lab2/results/runs/pseudo_label_*.json`, `lab2/src/pseudo_label.py`. **Time:** 2–3 h.
 
@@ -464,7 +528,9 @@ Van Engelen & Hoos (2020), *A survey on semi-supervised learning*, Machine Learn
 
 ---
 
-## T08 — Co-training — **SECOND METHOD** (Person B)
+## ~~T08 — Co-training — **SECOND METHOD** (Person B)~~
+
+> **Status 2026-09-11: DONE** in notebook §7 and §9. The features are split at random (seeded) into two views of 35; each learner teaches only the other; rows the two learners disagree on are rejected; and the final prediction averages the two views. Change in macro-F1 against the lower line: −0.0010 / −0.0005 / −0.0002, slightly worse. It has the lowest FAR of any method at every budget (0.0009 / 0.0006 / 0.0007), but at the cost of attack recall (0.9903 / 0.9955 / 0.9969). Still missing: each view's solo macro-F1, and the accuracy of the labels the learners passed to each other.
 
 **Needs:** T02, T03, T04. **Produces:** `lab2/results/runs/cotraining_*.json`, `lab2/src/cotraining.py`. **Time:** 2–3 h.
 
@@ -510,6 +576,8 @@ COLT '98 · Van Engelen & Hoos (2020) · lab brief section 5.
 
 ## T09 — Ablation (a): does the confidence cut-off matter? (Person A) — **the lab requires one ablation**
 
+> **Status 2026-09-11: PARTIAL, result not usable yet.** Notebook §11 tried cut-offs 0.90 / 0.95 / 0.99 at the 5% budget and scored them on the validation set, which is correct because the test set stays untouched. But all three runs added exactly **169,844** rows: the per-class cap, 42,461 per class per round × 2 rounds. The cap keeps the most confident rows first, so every cut-off picks the same rows, and the three runs are practically the same experiment (macro-F1 change 0.0000 / 0.0000 / −0.0001). To fix it, lift the cap for the ablation only (`PSEUDO_TO_TRUE_RATIO_PER_ROUND`, `MAX_PSEUDO_PER_CLASS_PER_ROUND`) so the cut-off actually decides which rows get in. Ideally also run it at 1%, where it matters most. Alternatively, do T10, which also counts as the required ablation.
+
 **Needs:** T07. **Produces:** `lab2/results/runs/abl_thresh_*.json`, `lab2/src/ablation_threshold.py`. **Time:** 1 h.
 
 **Why:** An ablation changes exactly one setting and holds everything else still, so you can say
@@ -535,6 +603,8 @@ the one knob that decides whether pseudo-labelling helps or feeds the model garb
 
 ## T10 — Ablation (b): how much unlabelled data do you actually need? (Person B, optional)
 
+> **Status 2026-09-11: NOT STARTED** (optional).
+
 **Needs:** T07 or T08. **Produces:** `lab2/results/runs/abl_pool_*.json`, `lab2/src/ablation_pool.py`. **Time:** 1 h.
 
 **Why:** The lab requires one ablation; T09 covers it. This second one is cheap and answers a
@@ -555,7 +625,9 @@ traffic, or do you get most of the benefit from a quarter of it?
 
 ---
 
-## T11 — Build the results table (Person A)
+## ~~T11 — Build the results table (Person A)~~
+
+> **Status 2026-09-11: DONE** as Table 1 in notebook §10. It has a row for every method × budget, all five metrics, `macro_f1_gain` against the lower line at the same budget, rows in the planned order, and a CSV copy. Only one seed was run, so `macro_f1_std` is 0 everywhere. There is no markdown copy of the table yet.
 
 **Needs:** T05, T06, T07, T08 (T09/T10 fold in automatically). **Produces:** `lab2/results/tables/lab2_results.csv` + `.md`, `lab2/src/aggregate.py`. **Time:** 1 h.
 
@@ -581,7 +653,9 @@ report is built around. Because it just globs a folder, it works no matter who r
 
 ---
 
-## T12 — The curve (Person B)
+## ~~T12 — The curve (Person B)~~
+
+> **Status 2026-09-11: DONE** as Figure 1 in notebook §12. It plots macro-F1 against the budget for the lower line and both SSL methods, draws the full-label upper line as a dashed horizontal line, has a caption, and is saved at dpi 180. Not done: the optional FAR figure (step 5), and a note in the caption that the Y axis is zoomed (step 4).
 
 **Needs:** T11. **Produces:** `lab2/results/figures/macro_f1_vs_budget.png`, `lab2/src/plot_curve.py`. **Time:** 45 min.
 
@@ -611,6 +685,8 @@ do you keep, and at what budget.
 
 ## T13 — README (Person B)
 
+> **Status 2026-09-11: PARTIAL.** Notebook §14 has a "How to run" list covering libraries, where to put the data, Run All, and seeds. It still needs to become a README file, and that file should mention the optional `xgboost` install and the exact Lab 1 data file to use.
+
 **Needs:** T01–T12 roughly working. **Produces:** `lab2/README.md`. **Time:** 45 min.
 
 **Why:** Graded directly ("a README explains how to run it; seed is fixed"). A marker who cannot run
@@ -628,6 +704,8 @@ implements (copy the style from Lab 1's README); and a short troubleshooting sec
 ---
 
 ## T14 — The report, 2–3 pages (Person A writes the frame, both write their own method)
+
+> **Status 2026-09-11: NOT STARTED.** Notebook §14 has discussion prompts and a placeholder contribution line (`[Name] implemented…`) to fill in.
 
 **Needs:** T11, T12. **Produces:** `report/Lab2_report.pdf`. **Time:** 3 h. **Worth 25% of the grade.**
 
@@ -656,6 +734,8 @@ sections and make sure every table and figure is referred to by number in the te
 
 ## T15 — Reproducibility check (both, together, 1 h)
 
+> **Status 2026-09-11: NOT STARTED.** The notebook has run once, on one machine. Check one risk before anything else: with `MODEL_BACKEND = "auto"`, a machine without CUDA XGBoost silently switches to `HistGradientBoostingClassifier`, so the two of you would get different numbers. Set `MODEL_BACKEND` to one fixed value. §13 already writes a `run_manifest.json` with the seed and settings.
+
 **Needs:** everything. **Produces:** `lab2/run_all_lab2.py`, a clean end-to-end run.
 
 **Why:** "Code runs start-to-finish and reproduces your numbers" is the first line of the 30%
@@ -680,6 +760,8 @@ left over in someone's notebook.
 ---
 
 ## T16 — Submit (both, 30 min)
+
+> **Status 2026-09-11: NOT STARTED.**
 
 **Steps:** update `CHANGELOG.md` with the last entries · commit and push · export the report to PDF ·
 zip the repo *without* `data/` and `collab/` (the `.gitignore` already lists them) · upload the code

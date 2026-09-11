@@ -26,6 +26,49 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates a
 
 ## [Unreleased]
 
+### [T01, T03, T04, T06, T07, T08, T11, T12] Whole experiment in one notebook — @kirsil-5 — 2026-09-10
+**What:** Added `Lab_2_SSL_CICIDS.ipynb`, 29 cells run end to end on the 8 CICIDS2017 CSVs. It
+contains a settings cell, data loading and cleaning, stratified 1 / 5 / 10% label budgets, the
+few-label lower line, iterative pseudo-labelling, co-training, a full-label upper line, a
+confidence-threshold ablation scored on validation only, a results table (Table 1), a macro-F1 curve
+(Figure 1), automated sanity checks and a run manifest.
+
+**Why:** One notebook that runs top to bottom with Run All matches the brief's "notebook or
+scripts" option. Choices recorded in it:
+- one base model for every method: XGBoost on the GPU, falling back to `HistGradientBoostingClassifier`;
+- class-balanced sample weights, with each pseudo-label worth 0.5 of a real label;
+- confidence cut-off 0.95, 2 rounds, and a per-class cap on pseudo-labels added per round;
+- co-training on a random, seeded 35/35 feature split that rejects rows the two learners disagree on.
+
+**Result** (test set, seed 42 only, macro-F1 / FAR):
+
+| Budget | Few-label lower line | Pseudo-labelling | Co-training |
+|---|---|---|---|
+| 1% | 0.9969 / 0.0016 | 0.9965 / 0.0012 | 0.9958 / 0.0009 |
+| 5% | 0.9983 / 0.0010 | 0.9983 / 0.0008 | 0.9978 / 0.0006 |
+| 10% | 0.9984 / 0.0011 | 0.9985 / 0.0009 | 0.9982 / 0.0007 |
+| 100% (retrained upper line) | 0.9986 / 0.0011 | | |
+
+Neither SSL method beat the lower line on macro-F1. Both lowered FAR at every budget. Output files
+went to `lab2_outputs/` on the author's machine and are not committed.
+
+**Not yet valid for the report** (checked 2026-09-11; details under Progress in `TASKS.md`):
+- It ran in `raw_csv` mode and built a new split (1,698,445 / 566,149 / 566,149 rows, 70 features,
+  19.70% attack) instead of using Lab 1's (267,984 / 89,328 / 89,329 rows, 68 features, 15.07%
+  attack). Duplicates were not removed, and `Destination Port` and the duplicated
+  `Fwd Header Length.1` were kept. Fix: re-run on Lab 1's split (T02).
+- The threshold ablation added exactly 169,844 rows at every cut-off because the per-class cap
+  decided the count, so it does not measure the cut-off yet (T09).
+- Only seed 42 was run, and the upper line is retrained rather than Lab 1's score (T05).
+
+**Sources:** Lee (2013), *Pseudo-Label*; Van Engelen & Hoos (2020), *A survey on semi-supervised
+learning*; Blum & Mitchell (1998), *Combining Labeled and Unlabeled Data with Co-Training* (missing
+from the notebook's own reference list, so add it to the report);
+[scikit-learn semi-supervised learning guide](https://scikit-learn.org/stable/modules/semi_supervised.html);
+[scikit-learn `HistGradientBoostingClassifier`](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.HistGradientBoostingClassifier.html);
+[XGBoost GPU support](https://xgboost.readthedocs.io/en/stable/gpu/index.html);
+[CICIDS2017](https://www.unb.ca/cic/datasets/ids-2017.html).
+
 ### [T-init] Project scaffolding: task list, .gitignore, changelog — 2026-09-09
 **What:** Read both lab briefs and the finished Lab 1 project in `collab/collab/`, then wrote
 `TASKS.md` (17 tasks, T00–T16), this `CHANGELOG.md`, and `.gitignore`.
@@ -70,20 +113,20 @@ semi-supervised methods (T07 pseudo-labelling, T08 co-training) are completely i
 
 Move each line up into `[Unreleased]` as a full entry when the task is done.
 
-- [ ] `T00` environment set up, Lab 1 `splits.joblib` present on both machines — @B
-- [ ] `T01` `lab2/` skeleton and `src/config.py` (SEED, BUDGETS, base model) — @A
-- [ ] `T02` frozen data snapshot + fingerprint — @A
-- [ ] `T03` scoring helper and per-run JSON writer — @B
-- [ ] `T04` stratified 1% / 5% / 10% label splits — @B
-- [ ] `T05` upper line (Lab 1, 100% labels) — @A
-- [ ] `T06` lower line (few labels only) — @B
-- [ ] `T07` pseudo-labelling (required method) — @A
-- [ ] `T08` co-training (second method) — @B
-- [ ] `T09` ablation: confidence cut-off — @A
+- [ ] `T00` environment set up, Lab 1 `splits.joblib` present on both machines — @B *(partial: teammate's machine only)*
+- [x] `T01` `lab2/` skeleton and `src/config.py` (SEED, BUDGETS, base model) — @A *(done in notebook §2)*
+- [ ] `T02` frozen data snapshot + fingerprint — @A *(blocking: notebook used a new split)*
+- [x] `T03` scoring helper and per-run JSON writer — @B *(done in notebook §5/§10, as CSV)*
+- [x] `T04` stratified 1% / 5% / 10% label splits — @B *(done in notebook §5)*
+- [ ] `T05` upper line (Lab 1, 100% labels) — @A *(partial: retrained, not Lab 1's score)*
+- [x] `T06` lower line (few labels only) — @B *(done in notebook §9)*
+- [x] `T07` pseudo-labelling (required method) — @A *(done in notebook §6/§9)*
+- [x] `T08` co-training (second method) — @B *(done in notebook §7/§9)*
+- [ ] `T09` ablation: confidence cut-off — @A *(partial: cap masks the cut-off)*
 - [ ] `T10` ablation: unlabelled pool size (optional) — @B
-- [ ] `T11` results table — @A
-- [ ] `T12` macro-F1 and FAR curves — @B
-- [ ] `T13` `lab2/README.md` — @B
+- [x] `T11` results table — @A *(done in notebook §10)*
+- [x] `T12` macro-F1 and FAR curves — @B *(macro-F1 done in notebook §12; FAR figure not made)*
+- [ ] `T13` `lab2/README.md` — @B *(partial: "How to run" inside notebook §14)*
 - [ ] `T14` report PDF (2–3 pages + appendix) — @A + @B
 - [ ] `T15` reproducibility check on both machines — @A + @B
 - [ ] `T16` submission to Canvas — @A + @B
