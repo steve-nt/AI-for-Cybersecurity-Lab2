@@ -54,6 +54,8 @@ missing is listed on the task's **Status** line.
 The "Done" rows share one more gap: only seed 42 was run (`SEEDS = (42,)`), so every ± spread is 0.
 Set `SEEDS = (42, 43, 44)` in §2 when you re-run after T02.
 
+Smaller fixes that span several tasks are tracked as a checklist in [`ISSUE.md`](ISSUE.md).
+
 ---
 
 ## 0. The one-paragraph version of this lab

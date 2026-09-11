@@ -26,6 +26,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates a
 
 ## [Unreleased]
 
+### [Review] Issue list for the Lab 2 notebook — 2026-09-11
+**What:** Added `ISSUE.md`, which lists 19 problems found while checking `Lab_2_SSL_CICIDS.ipynb`
+against the lab brief, Lab 1 and `TASKS.md`. Each one has a severity, a location, the problem, a fix,
+and the task it relates to.
+
+**Why:** The status lines in `TASKS.md` say what each task is still missing. Fixes that span several
+tasks (reproducibility, `.gitignore`, captions, references) had no place to live. A separate
+checklist lets either person pick one up and tick it off without editing the task descriptions.
+
+**Result:** 1 blocking, 5 high, 7 medium and 6 low issues. The most important besides the wrong split
+(I-01):
+- the threshold ablation selects the same rows at every cut-off (I-02);
+- the notebook can silently switch models on another machine (I-05);
+- after the switch to Lab 1's split, the per-class cap would let pseudo-labelling use only about 2% of
+  the unlabelled pool at the 1% budget (I-07);
+- `.gitignore` doesn't cover the raw CSVs in `data/` (I-09).
+
+**Sources:** Lab 2 brief (steps 2–6 and the grading table); Lab 1 `collab/collab/src/config.py`
+(`ID_COLUMNS`), `clean.py` and `metrics.py`; `git check-ignore` for I-09.
+
 ### [T01, T03, T04, T06, T07, T08, T11, T12] Whole experiment in one notebook — @kirsil-5 — 2026-09-10
 **What:** Added `Lab_2_SSL_CICIDS.ipynb`, 29 cells run end to end on the 8 CICIDS2017 CSVs. It
 contains a settings cell, data loading and cleaning, stratified 1 / 5 / 10% label budgets, the
