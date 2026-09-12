@@ -21,7 +21,7 @@ data/
 # Exception: keep the tiny fingerprint file, it proves both of us used the
 # same data snapshot (Task T02).
 !lab2/data/data_fingerprint.json
-
+!data/lab1_splits.npz
 # ---------------------------------------------------------------------------
 # Results: keep the small stuff (tables, figures, per-run JSON), drop models
 # ---------------------------------------------------------------------------
