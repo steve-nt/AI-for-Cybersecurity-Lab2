@@ -1,0 +1,49 @@
+{
+  "data_mode": "lab1_joblib",
+  "lab1_split_path": "C:\\Masters\\D7084E-D7041E\\Lab2\\AI-for-Cybersecurity-Lab2\\splits.joblib",
+  "lab1_split_sha256": "1891044e6bb39ea93549cd7b80f70cd83801efbbe59c69280a0ed90230d8f5ac",
+  "expected_lab1_sha256": null,
+  "lab1_metrics_path": "None",
+  "lab1_reference": {
+    "model": "Random Forest (Lab 1)",
+    "accuracy": 0.9984,
+    "macro_f1": 0.9968,
+    "recall_attack": 0.9923,
+    "roc_auc": 0.9999,
+    "FAR": 0.0006,
+    "source": "Lab 1 report, Table 1"
+  },
+  "backend": "sklearn_hist_gradient_boosting",
+  "seeds": [
+    42
+  ],
+  "budgets": [
+    0.01,
+    0.05,
+    0.1
+  ],
+  "confidence_threshold": 0.95,
+  "ssl_rounds": 2,
+  "pseudo_weight": 0.5,
+  "main_per_class_ratio_per_round": 1.0,
+  "ablation_budget": 0.01,
+  "ablation_thresholds": [
+    0.7,
+    0.8,
+    0.9,
+    0.95,
+    0.99
+  ],
+  "ablation_class_cap_enabled": false,
+  "train_rows": 267984,
+  "validation_rows": 89328,
+  "test_rows": 89329,
+  "features": 68,
+  "cpu_threads": 4,
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scikit_learn": "1.6.1"
+  }
+}

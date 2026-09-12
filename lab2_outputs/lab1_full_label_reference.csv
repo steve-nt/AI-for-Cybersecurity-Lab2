@@ -1,0 +1,2 @@
+model,accuracy,macro_f1,recall_attack,roc_auc,FAR,source
+Random Forest (Lab 1),0.9984,0.9968,0.9923,0.9999,0.0006,"Lab 1 report, Table 1"
