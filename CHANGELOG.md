@@ -26,6 +26,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates a
 
 ## [Unreleased]
 
+### [Review] Checked the rewritten notebook against ISSUE.md — 2026-09-12
+**What:** Read `Lab_2_SSL_CICIDS_FIXED.ipynb` (31 cells, 15 code) and checked each of the 19 issues.
+Ticked 12 as fixed, left 7 open, and added 4 new ones (I-20 to I-23) with a dated status line on
+every issue.
+
+**Why:** The rewrite is a real improvement: it accepts only the exact Lab 1 split and refuses
+anything else, pins the model to scikit-learn so two machines can't diverge, runs three seeds,
+disables the pseudo-label cap during the ablation so the threshold is actually the variable under
+test, reuses Lab 1's `false_alarm_rate` and cross-checks it, and adds pseudo-label precision
+diagnostics. But the notebook has **0 executed cells and no stored outputs**, `data/lab1_splits.npz`
+doesn't exist, and there's no `lab2_outputs/`, so the lab still has no results.
+
+**Result:** fixed: I-01 (split, in code), I-02 (ablation cap), I-03 (Lab 1 upper line and caption),
+I-04 (three seeds), I-05 (fixed backend), I-06 (Lab 1 metric reuse), I-08 (cleaning modes removed),
+I-09 (`data/` now ignored, which matters because the 8 raw CSVs are now in `data/`), I-10
+(pseudo-label precision and per-view scores), I-11 (ablation at 1%), I-17 (title), I-18 (`ddof=1`).
+Still open: I-07, I-12 to I-16, I-19. New:
+- I-20 (blocking): the notebook has never been run, so no results exist;
+- I-21: `REQUIRE_LAB1_METRICS_REUSE` points at `collab/collab/src/metrics.py`, which is gitignored, so
+  a clean clone fails; copy it to `src/metrics.py`, which is not ignored;
+- I-22: both the old and the fixed notebook are in the repo;
+- I-23: the split SHA-256 check exists but is set to `None`.
+
+**Sources:** `Lab_2_SSL_CICIDS_FIXED.ipynb` §2–§15; Lab 1 `collab/collab/src/metrics.py`;
+`git check-ignore` for I-09 and I-21.
+
 ### [Review] Issue list for the Lab 2 notebook — 2026-09-11
 **What:** Added `ISSUE.md`, which lists 19 problems found while checking `Lab_2_SSL_CICIDS.ipynb`
 against the lab brief, Lab 1 and `TASKS.md`. Each one has a severity, a location, the problem, a fix,
