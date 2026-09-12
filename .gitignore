@@ -17,7 +17,7 @@ data/processed/
 *.joblib
 *.pkl
 *.h5
-
+data/
 # Exception: keep the tiny fingerprint file, it proves both of us used the
 # same data snapshot (Task T02).
 !lab2/data/data_fingerprint.json
