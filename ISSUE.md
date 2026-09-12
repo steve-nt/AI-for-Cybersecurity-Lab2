@@ -50,6 +50,8 @@ in §8–§12 must be regenerated afterwards.
 ### [ ] I-20 · The fixed notebook has never been run, so there are still no results
 
 **Status 2026-09-12 (later): unblocked, still needs the run.** `data/lab1_splits.npz` now exists (40.4 MB, exported from `collab/collab/data/processed/splits.joblib`). Every check in §3 was reproduced against it and passed: shapes 267,984 / 89,328 / 89,329 × 68, test class counts 75,868 benign and 13,461 attack, overall attack rate 0.1507, no NaN or infinity after the float32 cast, 68 unique feature names, and a clean round-trip with `allow_pickle=False`. A `.venv` with numpy, pandas, scikit-learn and joblib is in place (see I-13). What remains is Run All plus committing `lab2_outputs/`.
+
+**Status 2026-09-12 (evening): main results done, notebook still incomplete.** Two full runs of sections 1–10 finished and agree to four decimals; the notebook now stores outputs for 11 of 15 code cells, and `lab2_outputs/` holds the results tables plus the ablation CSV. Both runs were killed by the memory watchdog in the ablation cell, so cells 23–29 (ablation, Figure 1, diagnostics, §14 checks) still have no stored output and §14 has never printed its all-checks-passed line. Table 2 exists because each threshold was run in its own process. To finish: free memory (page cache was holding ~6.3 GB, leaving under 1 GB free) and re-run.
 **Where:** `Lab_2_SSL_CICIDS_FIXED.ipynb` (15 code cells, 0 executed) · **Tasks:** T02, T05–T12, T15
 
 **Problem:** The rewrite fixes the code, but nothing has been produced from it. `data/lab1_splits.npz`
@@ -70,6 +72,8 @@ ignored.
 ### [x] I-02 · The confidence-threshold ablation doesn't test the threshold
 
 **Status 2026-09-12: FIXED.** §11 passes `apply_class_cap=False` for every ablation run and sweeps 0.70 / 0.80 / 0.90 / 0.95 / 0.99. §14 asserts `passed_threshold == pseudo_labels` to prove the cap really was off, and warns if every threshold still picks the same count. Table 2 now shows `passed_threshold` and pseudo-label precision, so the coverage-versus-quality trade-off is visible.
+
+**Status 2026-09-12 (later): confirmed by running it.** All five thresholds executed: adopted counts are 265,244 / 265,007 / 264,828 / 263,726 / 260,633 out of a 265,304-row pool, i.e. five distinct values with `passed == adopted` in every row, so the cap really is off and the threshold really is the variable. Result: precision rises with the threshold (0.9910 → 0.9938) but no threshold beats the baseline (−0.0003 to −0.0029 macro-F1), because even 0.99 still adopts 98.2% of the pool. Written up as Table 2 in both reports.
 
 **Where:** §11, and `choose_confident` in §5 · **Task:** T09
 
@@ -160,6 +164,8 @@ report that the file is a copy of Lab 1's, so it still counts as reuse.
 ### [ ] I-07 · The per-class cap, not the 0.95 cut-off, controls pseudo-labelling
 
 **Status 2026-09-12: PARTLY ADDRESSED, decision still needed.** The cap stays on in the main runs by design, but it is now measured: every round logs `passed_threshold` next to `accepted_after_cap`, so the report can show when the cap rather than the cut-off did the work. The limit itself is unchanged: with `PSEUDO_TO_TRUE_RATIO_PER_ROUND = 1.0` and 2 rounds, the 1% budget can add at most 5,360 rows, about 2% of the unlabelled pool. Decide before the final run whether to raise the ratio, and say either way in the report.
+
+**Status 2026-09-12 (evening): answered by the ablation — keep the cap.** My earlier suggestion to consider raising the ratio is contradicted by the data. Table 2 removed the cap at the 1% budget: adoption rose to 98–100% of the pool at every threshold and macro-F1 fell below the baseline in all five settings (−0.0003 to −0.0029), because ~1% of 265,000 adopted rows is about 2,400 of the model's own systematic errors. The conservative cap is what produced the +0.0018 and +0.0038 gains, so it should stay as it is and be reported as a deliberate design choice rather than a limitation.
 
 **Where:** `per_class_cap` in §6 and §7 · **Tasks:** T07, T14
 

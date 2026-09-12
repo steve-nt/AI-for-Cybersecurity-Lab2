@@ -26,6 +26,49 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates a
 
 ## [Unreleased]
 
+### [T05-T12, T14] Ran the experiment and wrote both reports — 2026-09-12
+**What:** Executed `Lab_2_SSL_CICIDS_FIXED.ipynb` on the exported Lab 1 split, ran the threshold
+ablation, and wrote `Report-Academic.md` (~2,400 words) and `Report-Plain-Language.md`
+(~1,700 words).
+
+**Why:** Two reports because the audiences differ: the academic one follows the brief's required
+sections (scarcity and SSL, method, Table 1 + Figure 1 with captions, discussion, reproducibility,
+contribution line, references), while the plain-language one explains the same experiment and the
+same numbers with no jargon, for a reader with no background.
+
+**Result — Table 1** (test set, mean of seeds 42/43/44, macro-F1 with the per-seed gain over the
+same-seed lower baseline):
+
+| Budget | Lower baseline | Pseudo-labelling | Co-training |
+|---|---|---|---|
+| 1% | 0.9795 ± 0.0029 | 0.9814 (+0.0018) | **0.9833 (+0.0038)** |
+| 5% | 0.9940 ± 0.0001 | 0.9942 (+0.0002) | 0.9938 (−0.0003) |
+| 10% | 0.9943 ± 0.0006 | 0.9947 (+0.0004) | 0.9946 (+0.0003) |
+
+Same-model 100% ceiling 0.9962; Lab 1 Random Forest 0.9968. **SSL helps only at 1%**, and mainly by
+cutting false alarms: FAR 0.0045 → 0.0035 (pseudo) → 0.0021 (co-training) with recall unchanged,
+about 345 → 162 false alerts on the 75,868 benign test flows. Pseudo-label precision was ~1.0
+throughout.
+
+**Result — Table 2** (ablation, 1% budget, validation, cap disabled): precision rises with the
+threshold (0.9910 at 0.70 to 0.9938 at 0.99) but **no threshold beats the baseline** (−0.0003 to
+−0.0029), because even 0.99 adopts 98.2% of the 265,304-row pool. Conclusion: the per-class **cap**,
+not the threshold, is what made pseudo-labelling help in Table 1. Uncapped adoption imports roughly
+2,400 of the model's own systematic errors and lowers recall (0.9562 → 0.9441).
+
+**Also worth recording:**
+- Every Table 1 value reproduced to four decimals across two independent end-to-end runs; only
+  timings differed. Determinism comes from the fixed seeds, pinned scikit-learn backend and fixed
+  thread count.
+- Running three seeds changed the conclusion. On seed 42 alone both SSL methods lose at 1%
+  (0.9822 → 0.9786 / 0.9779); seeds 43 and 44 both gain. The spread (±0.003–0.005) is the size of
+  the effect, so this is a positive tendency, not a demonstrated win.
+- The notebook is still not fully executed: see I-20.
+
+**Sources:** `lab2_outputs/lab2_results_raw.csv`, `lab2_results_summary.csv`,
+`confidence_ablation_validation.csv`; Lee (2013); Blum & Mitchell (1998); Van Engelen & Hoos (2020);
+Sharafaldin et al. (2018).
+
 ### [T02] Exported Lab 1's split to `data/lab1_splits.npz` — 2026-09-12
 **What:** Converted `collab/collab/data/processed/splits.joblib` (489 MB) into
 `data/lab1_splits.npz` (40.4 MB), the file `Lab_2_SSL_CICIDS_FIXED.ipynb` §3 requires. Also created a
