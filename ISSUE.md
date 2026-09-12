@@ -48,6 +48,8 @@ Then Run All and check that §3 prints `Resolved data mode: npz` and `train 2679
 in §8–§12 must be regenerated afterwards.
 
 ### [ ] I-20 · The fixed notebook has never been run, so there are still no results
+
+**Status 2026-09-12 (later): unblocked, still needs the run.** `data/lab1_splits.npz` now exists (40.4 MB, exported from `collab/collab/data/processed/splits.joblib`). Every check in §3 was reproduced against it and passed: shapes 267,984 / 89,328 / 89,329 × 68, test class counts 75,868 benign and 13,461 attack, overall attack rate 0.1507, no NaN or infinity after the float32 cast, 68 unique feature names, and a clean round-trip with `allow_pickle=False`. A `.venv` with numpy, pandas, scikit-learn and joblib is in place (see I-13). What remains is Run All plus committing `lab2_outputs/`.
 **Where:** `Lab_2_SSL_CICIDS_FIXED.ipynb` (15 code cells, 0 executed) · **Tasks:** T02, T05–T12, T15
 
 **Problem:** The rewrite fixes the code, but nothing has been produced from it. `data/lab1_splits.npz`
@@ -249,6 +251,8 @@ pandas 3.0.5, XGBoost 3.2.0.
 
 **Status 2026-09-12: STILL OPEN.** This machine still has no pandas and no `.venv`. The fixed notebook also needs `threadpoolctl`.
 
+**Status 2026-09-12 (later): mostly done.** `.venv` now has numpy 2.5.3, pandas 3.0.5, scikit-learn 1.9.1, joblib 1.6.0 and threadpoolctl 3.6.0, which is close to the versions the teammate ran (pandas 3.0.5, scikit-learn 1.9.0). Still missing for a full notebook run: `matplotlib` and `jupyter`.
+
 **Where:** local environment · **Task:** T00
 
 **Problem:** System `python3` is 3.13.7 with no pandas or scikit-learn, and there's no `.venv`.
@@ -331,6 +335,14 @@ notebook with CSV output. The `lab2/data/*` rules in `.gitignore` also point at 
 `TASKS.md` to match, or split the notebook into scripts later.
 
 ### [ ] I-23 · The split digest check is available but switched off
+
+**Status 2026-09-12 (later): the value is ready to paste.** Computed with the notebook's own `_split_fingerprint` on the exported file, so it should match what §3 prints:
+
+```python
+EXPECTED_LAB1_SHA256 = "1891044e6bb39ea93549cd7b80f70cd83801efbbe59c69280a0ed90230d8f5ac"
+```
+
+Set it in §2 after the first run confirms the same digest, and have the other person check that their export produces it too.
 **Where:** §2 `EXPECTED_LAB1_SHA256 = None` · **Task:** T15
 
 **Problem:** §3 computes a SHA-256 over the split and would compare it, but with `None` it compares

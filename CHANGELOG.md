@@ -26,6 +26,42 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates a
 
 ## [Unreleased]
 
+### [T02] Exported Lab 1's split to `data/lab1_splits.npz` — 2026-09-12
+**What:** Converted `collab/collab/data/processed/splits.joblib` (489 MB) into
+`data/lab1_splits.npz` (40.4 MB), the file `Lab_2_SSL_CICIDS_FIXED.ipynb` §3 requires. Also created a
+`.venv` with numpy 2.5.3, pandas 3.0.5, scikit-learn 1.9.1, joblib 1.6.0 and threadpoolctl 3.6.0,
+because the joblib file contains pandas DataFrames and a fitted scikit-learn scaler and cannot be read
+without them.
+
+**Why:** A plain copy-and-rename cannot work: `splits.joblib` is a pickled Python dictionary, while
+the notebook calls `np.load(..., allow_pickle=False)` and expects the keys `X_train, y_train, X_val,
+y_val, X_test, y_test, feature_names`. The export takes Lab 1's **raw** (unscaled) features, since
+`HistGradientBoostingClassifier` needs no scaling and Lab 1's Random Forest reference was trained on
+raw features too; `yb_*` becomes `y_*` as int8; and `feature_names` is written as a plain Unicode
+string array so the file opens without pickling. Features are cast to float32, which is what the
+notebook does on load anyway, and it keeps the file small.
+
+**Result:** every check in §3 reproduced and passed.
+
+| Check | Value |
+|---|---|
+| Shapes | train 267,984 × 68, validation 89,328 × 68, test 89,329 × 68 |
+| Test class counts | 75,868 benign / 13,461 attack (matches the notebook's expected values) |
+| Attack rate | 0.1507 in all three splits |
+| Finite after float32 | yes, no NaN or infinity |
+| Feature names | 68, all unique, starting `Flow Duration`, `Total Fwd Packets`, … |
+| Round-trip `allow_pickle=False` | identical arrays |
+| Seed in the Lab 1 bundle | 42 |
+
+The notebook's own `_split_fingerprint` gives
+`1891044e6bb39ea93549cd7b80f70cd83801efbbe59c69280a0ed90230d8f5ac`, ready for `EXPECTED_LAB1_SHA256`
+(I-23). The `.npz` is gitignored by the `data/` rule, so each person exports their own copy and the
+digest is what proves they match. This clears the blocker in front of I-20; the notebook itself still
+has to be run.
+
+**Sources:** `Lab_2_SSL_CICIDS_FIXED.ipynb` §3 (export recipe and validation rules); Lab 1
+`collab/collab/src/prepare.py` (which produced the split).
+
 ### [Review] Checked the rewritten notebook against ISSUE.md — 2026-09-12
 **What:** Read `Lab_2_SSL_CICIDS_FIXED.ipynb` (31 cells, 15 code) and checked each of the 19 issues.
 Ticked 12 as fixed, left 7 open, and added 4 new ones (I-20 to I-23) with a dated status line on
