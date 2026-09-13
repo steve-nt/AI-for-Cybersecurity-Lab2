@@ -47,7 +47,9 @@ same cleaning, split and test set as Lab 1.
 Then Run All and check that §3 prints `Resolved data mode: npz` and `train 267984`. Every number
 in §8–§12 must be regenerated afterwards.
 
-### [ ] I-20 · The fixed notebook has never been run, so there are still no results
+### [x] I-20 · The fixed notebook has never been run, so there are still no results
+
+**Status 2026-09-13: FIXED on Google Colab.** `AI-for-Cybersecurity-Lab2-01/Lab_2_SSL_CICIDS_FIXED.ipynb` executed all 16 code cells with no errors (Python 3.13.15, scikit-learn 1.6.1). Section 3 reproduced digest `1891044e…`, section 5 loaded `src/metrics.py`, and section 14 printed ALL AUTOMATED CHECKS PASSED. Training took 104 s plus 40 s for the ablation, against ~90 min on the local machine, so the local runs were throttled. Note: numbers differ from the local scikit-learn 1.9.1 runs by up to 0.0022 macro-F1; both reports now use the Colab values. Also note `.gitignore` line 30 (`lab2_outputs/`) keeps the result CSVs and Figure 1 out of git.
 
 **Status 2026-09-12 (later): unblocked, still needs the run.** `data/lab1_splits.npz` now exists (40.4 MB, exported from `collab/collab/data/processed/splits.joblib`). Every check in §3 was reproduced against it and passed: shapes 267,984 / 89,328 / 89,329 × 68, test class counts 75,868 benign and 13,461 attack, overall attack rate 0.1507, no NaN or infinity after the float32 cast, 68 unique feature names, and a clean round-trip with `allow_pickle=False`. A `.venv` with numpy, pandas, scikit-learn and joblib is in place (see I-13). What remains is Run All plus committing `lab2_outputs/`.
 

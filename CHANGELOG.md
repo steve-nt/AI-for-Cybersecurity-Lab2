@@ -26,6 +26,38 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates a
 
 ## [Unreleased]
 
+### [T14] Reports rebuilt from the Colab run — 2026-09-13
+**What:** Rewrote `Report-Academic.md` and `Report-Plain-Language.md` from the complete Google Colab run
+in `AI-for-Cybersecurity-Lab2-01/`, which executed every cell and passed section 14's checks.
+
+**Why:** The reports quoted local runs (scikit-learn 1.9.1). Colab used scikit-learn 1.6.1 on the same
+data (digest matched) and seeds, and 55 of Table 1's cells differ at four decimals. The submitted
+notebook shows the Colab numbers, so the reports must match it.
+
+**Mistakes corrected in the reports:**
+- Every number in Table 1, Table 2 and the per-seed table.
+- Table 2 claims that no longer held: "precision rises monotonically" (it dips at 0.95), "no threshold
+  beats the baseline" (0.70 is +0.0005), "the strictest is worst" (0.95 is worst), "recall falls in
+  every setting" (it rises at 0.70).
+- "Co-training beats pseudo-labelling because it rejects disagreements": the rule never triggered
+  (0 conflicts in 18 rounds), and the two methods differ by 0.0003 at 1%. Replaced with the diagnostic
+  explanation: individually sufficient but non-independent views.
+- "Earlier single-seed version concluded the opposite" conflated a run on the wrong split and model;
+  now "seed 42 alone would conclude the opposite", which is true on this run.
+- The "cap is what made SSL work" claim was softened to strong evidence, since Table 2 has no capped row
+  and uses one seed. It is now backed by the diagnostics: 94–99% of the pool passed the threshold, and
+  the cap kept ~1% at the 1% budget.
+- Figure 1's description: at 1% the SSL curves overlap each other; the y-axis spans 0.90–1.01.
+- Reproducibility: removed the "90 minutes" and separate-process ablation text; recorded the Colab
+  versions, 104 s + 40 s timings, and the cross-version drift (up to 0.0022, flipping pseudo-labelling's
+  5% gain sign).
+
+**New findings added:** FAR falls for both methods at every budget, not only 1% (co-training −53% at 5%,
+−57% at 10%); each co-training view alone reaches ~0.98 validation macro-F1 at 1%.
+
+**Sources:** `AI-for-Cybersecurity-Lab2-01/lab2_outputs/` (results, ablation, `ssl_diagnostics.csv`,
+`co_training_view_validation.csv`, `run_manifest.json`, Figure 1); Blum & Mitchell (1998).
+
 ### [T05-T12, T14] Ran the experiment and wrote both reports — 2026-09-12
 **What:** Executed `Lab_2_SSL_CICIDS_FIXED.ipynb` on the exported Lab 1 split, ran the threshold
 ablation, and wrote `Report-Academic.md` (~2,400 words) and `Report-Plain-Language.md`
